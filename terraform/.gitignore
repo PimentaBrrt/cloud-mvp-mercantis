@@ -1,0 +1,18 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Variáveis com dados sensíveis
+terraform.tfvars
+*.auto.tfvars
+
+# Planos
+*.tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
