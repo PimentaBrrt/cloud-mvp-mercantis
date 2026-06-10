@@ -82,9 +82,10 @@ resource "aws_db_instance" "mariadb" {
   # Segurança: nunca exposto à internet.
   publicly_accessible = false
 
-  # Backups e retenção.
-  backup_retention_period = 7
-  backup_window           = "03:00-04:00"
+  # Backups: desabilitados no MVP (retention = 0) porque o Free Tier novo
+  # limita a retenção. Em produção, use 7 dias. backup_window não é permitido
+  # quando a retenção é 0, por isso foi removido.
+  backup_retention_period = 0
   maintenance_window      = "Mon:04:00-Mon:05:00"
 
   # Logs de auditoria/erro enviados ao CloudWatch.

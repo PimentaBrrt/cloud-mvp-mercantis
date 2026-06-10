@@ -25,6 +25,9 @@ resource "aws_security_group" "frontend" {
 }
 
 # HTTP apenas da prefix list do CloudFront — bloqueia acesso direto pela internet.
+# Apenas a porta 80: o CloudFront fala com a origem em http-only (ver cdn_waf.tf).
+# A prefix list do CloudFront pesa 55 regras; usar uma única porta cabe no limite
+# padrão de 60 regras por Security Group (duas portas estourariam o limite).
 resource "aws_security_group_rule" "frontend_http_from_cloudfront" {
   type              = "ingress"
   security_group_id = aws_security_group.frontend.id
@@ -33,16 +36,6 @@ resource "aws_security_group_rule" "frontend_http_from_cloudfront" {
   protocol          = "tcp"
   prefix_list_ids   = [data.aws_ec2_managed_prefix_list.cloudfront.id]
   description       = "HTTP somente do CloudFront (origin-facing)."
-}
-
-resource "aws_security_group_rule" "frontend_https_from_cloudfront" {
-  type              = "ingress"
-  security_group_id = aws_security_group.frontend.id
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  prefix_list_ids   = [data.aws_ec2_managed_prefix_list.cloudfront.id]
-  description       = "HTTPS somente do CloudFront (origin-facing)."
 }
 
 # Saída liberada (necessária para puxar a imagem Docker, patches, etc.).
