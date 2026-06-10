@@ -15,7 +15,7 @@ private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
 az_count             = 2
 
 # Frontend (container Docker na EC2)
-instance_type           = "t3.small"
+instance_type           = "t3.micro"
 frontend_image          = "nginxdemos/hello:plain-text"
 frontend_container_port = 80
 

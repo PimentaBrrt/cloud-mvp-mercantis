@@ -48,7 +48,7 @@ variable "az_count" {
 variable "instance_type" {
   description = "Tipo da instância EC2 que roda o container Docker do frontend."
   type        = string
-  default     = "t3.small"
+  default     = "t3.micro" # Elegível ao Free Tier (750h/mês nos primeiros 12 meses).
 }
 
 variable "frontend_image" {

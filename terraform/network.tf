@@ -1,7 +1,11 @@
 ###############################################################################
 # network.tf
 # Rede do MVP: VPC, subnets pública/privada em 2 AZs, Internet Gateway,
-# NAT Gateway, tabelas de rota e Network ACLs (camada extra de segurança).
+# tabelas de rota e Network ACLs (camada extra de segurança).
+#
+# Observação: a sub-rede privada NÃO tem rota para a internet. O banco (RDS)
+# não inicia conexões de saída, então não há NAT Gateway no MVP. Isso reduz
+# a superfície de ataque e elimina o maior custo do ambiente.
 ###############################################################################
 
 data "aws_availability_zones" "available" {
@@ -43,9 +47,9 @@ resource "aws_subnet" "public" {
 }
 
 # ---------------------------------------------------------------------------
-# Subnets privadas (uma por AZ) — onde fica o RDS MariaDB. Sem rota direta
-# para a internet (apenas saída via NAT). Duas AZs são exigidas pelo
-# DB Subnet Group do RDS e preparam o terreno para Multi-AZ na arquitetura final.
+# Subnets privadas (uma por AZ) — onde fica o RDS MariaDB. Sem rota para a
+# internet. Duas AZs são exigidas pelo DB Subnet Group do RDS e preparam o
+# terreno para Multi-AZ na arquitetura final.
 # ---------------------------------------------------------------------------
 resource "aws_subnet" "private" {
   count             = var.az_count
@@ -71,32 +75,6 @@ resource "aws_internet_gateway" "main" {
 }
 
 # ---------------------------------------------------------------------------
-# NAT Gateway — permite que recursos em subnet privada (ex.: RDS para patches,
-# instâncias internas) tenham SAÍDA para a internet sem aceitar conexões de
-# entrada. Medida de segurança: o banco nunca é exposto publicamente.
-# ---------------------------------------------------------------------------
-resource "aws_eip" "nat" {
-  domain = "vpc"
-
-  tags = {
-    Name = "${local.prefix}-nat-eip"
-  }
-
-  depends_on = [aws_internet_gateway.main]
-}
-
-resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public[0].id
-
-  tags = {
-    Name = "${local.prefix}-nat"
-  }
-
-  depends_on = [aws_internet_gateway.main]
-}
-
-# ---------------------------------------------------------------------------
 # Tabelas de rota
 # ---------------------------------------------------------------------------
 resource "aws_route_table" "public" {
@@ -118,13 +96,10 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+# Route table privada: apenas a rota local da VPC (implícita). Sem 0.0.0.0/0,
+# portanto sem acesso à internet a partir da sub-rede privada.
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.main.id
-  }
 
   tags = {
     Name = "${local.prefix}-rt-private"
@@ -188,8 +163,8 @@ resource "aws_network_acl" "public" {
   }
 }
 
-# NACL privada: só aceita tráfego vindo de DENTRO da VPC (ex.: app -> banco)
-# e portas efêmeras de retorno. Bloqueia qualquer entrada direta da internet.
+# NACL privada: só aceita tráfego vindo de DENTRO da VPC (ex.: app -> banco).
+# Bloqueia qualquer entrada direta da internet.
 resource "aws_network_acl" "private" {
   vpc_id     = aws_vpc.main.id
   subnet_ids = aws_subnet.private[*].id
@@ -202,12 +177,12 @@ resource "aws_network_acl" "private" {
     from_port  = 3306
     to_port    = 3306
   }
-  # Portas efêmeras para respostas do NAT (downloads de patches etc.).
+  # Portas efêmeras para respostas a conexões iniciadas de dentro da VPC.
   ingress {
     rule_no    = 110
     protocol   = "tcp"
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.vpc_cidr
     from_port  = 1024
     to_port    = 65535
   }
@@ -216,7 +191,7 @@ resource "aws_network_acl" "private" {
     rule_no    = 100
     protocol   = "-1"
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.vpc_cidr
     from_port  = 0
     to_port    = 0
   }
