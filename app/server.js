@@ -161,6 +161,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Log de cada requisição: método, rota, status e tempo de resposta.
+// Sai no stdout do container e é coletado pelo Docker (e pelo CloudWatch).
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    console.log(
+      `${new Date().toISOString()} ${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - start}ms`
+    );
+  });
+  next();
+});
+
 const api = express.Router();
 
 api.get("/health", (req, res) => res.json({ status: "ok" }));

@@ -84,6 +84,10 @@ docker rm -f mercantis 2>/dev/null || true
 
 # Sobe a aplicação. Troque o JWT_SECRET e a senha do admin.
 docker run -d --name mercantis --restart unless-stopped -p 80:80 \
+  --log-driver=awslogs \
+  --log-opt awslogs-region=sa-east-1 \
+  --log-opt awslogs-group=/mercantis-mvp/app \
+  --log-opt awslogs-stream=mercantis \
   -e DB_SECRET_ARN="<DB_SECRET_ARN>" \
   -e STATIC_BUCKET="<STATIC_BUCKET>" \
   -e AWS_REGION="sa-east-1" \
@@ -117,6 +121,25 @@ Ao cadastrar um produto, o upload de imagem vai para o S3 e é servido via Cloud
   usando a **role da instância**. Nenhuma senha fica no código nem no histórico do shell.
 - O upload de imagem usa a mesma role para gravar no **S3** (`s3:PutObject`).
 - O banco continua **privado**: só a EC2 alcança a porta 3306.
+
+## Onde ver os logs
+
+A aplicação registra cada requisição (método, rota, status e tempo) e os eventos de
+inicialização. Há três lugares para olhar:
+
+1. **Na própria instância (rápido):**
+   ```bash
+   docker logs -f mercantis
+   ```
+2. **No CloudWatch (centralizado):** com o `--log-driver=awslogs` acima, o stdout do
+   container vai para o grupo de logs **`/mercantis-mvp/app`**. No console da AWS:
+   CloudWatch → Log groups → `/mercantis-mvp/app` → stream `mercantis`. Pela CLI:
+   ```bash
+   aws logs tail /mercantis-mvp/app --follow --region sa-east-1
+   ```
+3. **Logs de infraestrutura:**
+   - **VPC Flow Logs** (tráfego de rede): grupo `/vpc/mercantis-mvp/flow-logs`.
+   - **RDS** (erro, geral e slow query): grupos `/aws/rds/instance/mercantis-mvp-mariadb/...`.
 
 ## Atualizar a aplicação depois
 

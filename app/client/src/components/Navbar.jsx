@@ -21,9 +21,7 @@ export default function Navbar({ user, onLogout }) {
           {user ? (
             <button onClick={logout}>Sair</button>
           ) : (
-            <NavLink to="/entrar" className="btn btn-primary btn-sm" style={{ color: "#fff" }}>
-              Entrar
-            </NavLink>
+            <NavLink to="/entrar" className="btn nav-cta">Entrar</NavLink>
           )}
         </nav>
       </div>

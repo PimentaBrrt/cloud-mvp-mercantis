@@ -189,3 +189,9 @@ h1, h2, h3, .display { font-family: var(--font-display); letter-spacing: -0.02em
   .form-row { grid-template-columns: 1fr; }
   .hide-sm { display: none; }
 }
+
+/* CTA "Entrar" na navbar — especificidade maior que ".nav-links a" para
+   manter o fundo laranja (senão o "background: none" do link o apaga). */
+.nav-links a.nav-cta { background: var(--orange); color: #fff; padding: 10px 20px; box-shadow: var(--shadow); }
+.nav-links a.nav-cta:hover { background: var(--orange-deep); color: #fff; }
+.nav-links a.nav-cta:active { transform: translateY(1px); }

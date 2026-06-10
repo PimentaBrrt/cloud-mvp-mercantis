@@ -5,6 +5,16 @@
 # sem chave SSH (acesso via SSM), IP público elástico fixo.
 ###############################################################################
 
+# Log group para os logs da aplicação (enviados pelo log driver awslogs).
+resource "aws_cloudwatch_log_group" "app" {
+  name              = "/${local.prefix}/app"
+  retention_in_days = 30
+
+  tags = {
+    Name = "${local.prefix}-app-logs"
+  }
+}
+
 # AMI mais recente do Amazon Linux 2023 (mantida pela AWS, com SSM agent embutido).
 data "aws_ami" "al2023" {
   most_recent = true

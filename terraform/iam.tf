@@ -47,6 +47,14 @@ data "aws_iam_policy_document" "frontend_inline" {
     actions   = ["secretsmanager:GetSecretValue"]
     resources = [aws_secretsmanager_secret.db.arn]
   }
+
+  # Envio dos logs da aplicação (stdout do container) para o CloudWatch
+  # via log driver awslogs do Docker.
+  statement {
+    sid       = "AppLogsToCloudWatch"
+    actions   = ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams"]
+    resources = ["${aws_cloudwatch_log_group.app.arn}:*"]
+  }
 }
 
 resource "aws_iam_role_policy" "frontend_inline" {

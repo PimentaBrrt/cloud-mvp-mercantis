@@ -18,6 +18,10 @@ resource "random_password" "db" {
 resource "aws_secretsmanager_secret" "db" {
   name        = "${local.prefix}-db-credentials"
   description = "Credenciais do RDS MariaDB da Mercantis."
+
+  # Exclui o segredo imediatamente no destroy (sem janela de recuperação).
+  # Evita o erro "scheduled for deletion" ao recriar o ambiente depois.
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "db" {
