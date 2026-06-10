@@ -34,8 +34,8 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 # Política de privilégio mínimo: ler estáticos do S3 e ler o segredo do banco.
 data "aws_iam_policy_document" "frontend_inline" {
   statement {
-    sid     = "ReadStaticBucket"
-    actions = ["s3:GetObject", "s3:ListBucket"]
+    sid     = "ReadWriteStaticBucket"
+    actions = ["s3:GetObject", "s3:ListBucket", "s3:PutObject"]
     resources = [
       aws_s3_bucket.static.arn,
       "${aws_s3_bucket.static.arn}/*",

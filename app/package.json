@@ -1,0 +1,21 @@
+{
+  "name": "mercantis-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portal Mercantis — backend Express + API CRUD (usuários e produtos) servindo o frontend React.",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.620.0",
+    "@aws-sdk/client-secrets-manager": "^3.620.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.0"
+  }
+}
