@@ -4,6 +4,7 @@ export default function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
 
   function logout() {
+    if (!window.confirm("Tem certeza que deseja sair?")) return;
     onLogout();
     navigate("/");
   }

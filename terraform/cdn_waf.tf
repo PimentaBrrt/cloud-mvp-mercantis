@@ -138,6 +138,7 @@ resource "aws_cloudfront_distribution" "main" {
 
     forwarded_values {
       query_string = true
+      headers      = ["Authorization"] # repassa o token JWT para a origem (rotas autenticadas)
       cookies {
         forward = "all"
       }

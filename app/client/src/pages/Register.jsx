@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { Navigate, useNavigate, useLocation, Link } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import { api, auth } from "../api.js";
 
-export default function Login({ user, onLogin }) {
+export default function Register({ user, onLogin }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const dest = location.state?.from?.pathname || "/gestao/produtos";
 
   if (user) return <Navigate to="/gestao/produtos" replace />;
 
@@ -19,10 +18,10 @@ export default function Login({ user, onLogin }) {
     setError("");
     setBusy(true);
     try {
-      const { token, user: u } = await api.login(email.trim(), password);
+      const { token, user: u } = await api.register(name.trim(), email.trim(), password);
       auth.token = token;
       onLogin(u);
-      navigate(dest, { replace: true });
+      navigate("/gestao/produtos", { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -33,20 +32,26 @@ export default function Login({ user, onLogin }) {
   return (
     <div className="auth-wrap">
       <div className="panel auth-card rise">
-        <h1>Acesse a gestão</h1>
-        <p className="sub">Entre para gerenciar produtos e usuários da Mercantis.</p>
+        <h1>Criar conta</h1>
+        <p className="sub">Cadastre-se para acessar a gestão da Mercantis.</p>
         {error && <div className="alert alert-error">{error}</div>}
         <form onSubmit={submit}>
           <div className="field">
+            <label htmlFor="name">Nome</label>
+            <input id="name" value={name} autoComplete="name"
+              onChange={(e) => setName(e.target.value)} required />
+          </div>
+          <div className="field">
             <label htmlFor="email">E-mail</label>
-            <input id="email" type="email" value={email} autoComplete="username"
+            <input id="email" type="email" value={email} autoComplete="email"
               onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div className="field">
             <label htmlFor="password">Senha</label>
             <div className="pw-wrap">
               <input id="password" type={showPw ? "text" : "password"} value={password}
-                autoComplete="current-password" onChange={(e) => setPassword(e.target.value)} required />
+                autoComplete="new-password" minLength={6}
+                onChange={(e) => setPassword(e.target.value)} required />
               <button type="button" className="pw-toggle" onClick={() => setShowPw((v) => !v)}
                 aria-label={showPw ? "Ocultar senha" : "Mostrar senha"}>
                 {showPw ? "Ocultar" : "Mostrar"}
@@ -54,11 +59,11 @@ export default function Login({ user, onLogin }) {
             </div>
           </div>
           <button className="btn btn-primary" style={{ width: "100%" }} disabled={busy}>
-            {busy ? "Entrando..." : "Entrar"}
+            {busy ? "Criando..." : "Criar conta"}
           </button>
         </form>
         <p className="auth-alt">
-          Não tem conta? <Link to="/cadastrar">Cadastre-se</Link>
+          Já tem conta? <Link to="/entrar">Entrar</Link>
         </p>
       </div>
     </div>

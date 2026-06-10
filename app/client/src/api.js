@@ -30,6 +30,7 @@ async function request(path, { method = "GET", body, form } = {}) {
 
 export const api = {
   login: (email, password) => request("/auth/login", { method: "POST", body: { email, password } }),
+  register: (name, email, password) => request("/auth/register", { method: "POST", body: { name, email, password } }),
   // Produtos
   listProducts: () => request("/products"),
   listAllProducts: () => request("/products/all"),

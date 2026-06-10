@@ -189,6 +189,26 @@ api.post("/auth/login", async (req, res) => {
   res.json({ token: signToken(user), user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 });
 
+// Cadastro público: cria uma conta (role staff) e já devolve o token.
+api.post("/auth/register", async (req, res) => {
+  const { name, email, password } = req.body || {};
+  if (!name || !email || !password) return res.status(400).json({ error: "Preencha nome, e-mail e senha." });
+  if (String(password).length < 6) return res.status(400).json({ error: "A senha deve ter ao menos 6 caracteres." });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const [result] = await pool.query(
+      "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'staff')",
+      [name, email, hash]
+    );
+    const user = { id: result.insertId, name, email, role: "staff" };
+    res.status(201).json({ token: signToken(user), user });
+  } catch (e) {
+    if (e.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Já existe um usuário com este e-mail." });
+    console.error(e);
+    res.status(500).json({ error: "Não foi possível criar a conta." });
+  }
+});
+
 api.get("/auth/me", requireAuth, (req, res) => res.json({ user: req.user }));
 
 // --- Produtos ---

@@ -11,9 +11,16 @@ instância por meio do bucket S3 (a EC2 já tem permissão de leitura via IAM ro
 > `<STATIC_BUCKET>`, `<DB_SECRET_ARN>`, `<INSTANCE_ID>`) é para **substituir** pelo
 > valor real. Não cole o texto com os sinais `<>`, senão dá erro de validação.
 
-## 0. Pré-requisito: Aplicar o Terraform
+## 0. Pré-requisito: reaplicar o Terraform
 
-Siga as instrução do `README.md` para aplicar o Terraform.
+As últimas mudanças adicionam a permissão de `s3:PutObject` (upload de imagens) e
+ajustam o IMDS (`http_put_response_hop_limit = 2`) para o container acessar a role.
+São alterações in-place: a instância e o IP não mudam.
+
+```bash
+cd terraform
+terraform apply
+```
 
 Anote os valores que vamos usar:
 
@@ -23,7 +30,7 @@ terraform output -raw db_secret_arn         # ARN do segredo do banco
 terraform output ssm_access_hint            # contém o --target <instance-id>
 ```
 
-## 1. Enviar o código para o S3
+## 1. Enviar o código para o S3 (na sua máquina)
 
 Compacte a pasta `app` (sem `node_modules`) e suba para o bucket. No **PowerShell** (Windows):
 

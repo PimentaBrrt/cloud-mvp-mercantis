@@ -195,3 +195,15 @@ h1, h2, h3, .display { font-family: var(--font-display); letter-spacing: -0.02em
 .nav-links a.nav-cta { background: var(--orange); color: #fff; padding: 10px 20px; box-shadow: var(--shadow); }
 .nav-links a.nav-cta:hover { background: var(--orange-deep); color: #fff; }
 .nav-links a.nav-cta:active { transform: translateY(1px); }
+
+/* Campo de senha com botão mostrar/ocultar */
+.pw-wrap { position: relative; display: flex; align-items: center; }
+.pw-wrap input { width: 100%; padding-right: 86px; }
+.pw-toggle {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  border: none; background: var(--cream-2); color: var(--orange-deep);
+  font-weight: 700; font-size: 13px; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+}
+.pw-toggle:hover { background: #ffe6c7; }
+.auth-alt { margin-top: 18px; text-align: center; color: var(--muted); font-size: 14px; }
+.auth-alt a { color: var(--orange-deep); font-weight: 700; }

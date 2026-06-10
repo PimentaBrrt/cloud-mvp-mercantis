@@ -4,6 +4,7 @@ import { auth } from "./api.js";
 import Navbar from "./components/Navbar.jsx";
 import Storefront from "./pages/Storefront.jsx";
 import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
 import AdminProducts from "./pages/AdminProducts.jsx";
 import AdminUsers from "./pages/AdminUsers.jsx";
 
@@ -25,6 +26,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Storefront />} />
         <Route path="/entrar" element={<Login user={user} onLogin={handleLogin} />} />
+        <Route path="/cadastrar" element={<Register user={user} onLogin={handleLogin} />} />
         <Route
           path="/gestao/produtos"
           element={<RequireAuth user={user}><AdminProducts /></RequireAuth>}
