@@ -18,7 +18,7 @@ Este repositório provisiona, com Terraform, o MVP de migração da **Mercantis*
 | Segredos | Secrets Manager + KMS | — |
 | Auditoria | VPC Flow Logs → CloudWatch | — |
 
-Custo aproximado em repouso (sa-east-1): dominado por NAT Gateway, RDS `db.t3.micro` e EC2 `t3.small`. **Lembre-se de rodar `terraform destroy` ao terminar** para evitar cobranças.
+Custo aproximado em repouso (sa-east-1): dominado por NAT Gateway, RDS `db.t3.micro` e EC2 `t3.small`. **Rodar `terraform destroy` ao terminar** para evitar cobranças.
 
 ---
 
@@ -195,4 +195,3 @@ mercantis-mvp/
 | Portal retorna 502/erro | EC2 ainda rodando o `user_data` | aguarde ~3 min; veja `docker logs` via SSM |
 | Não consigo conectar no RDS de fora | comportamento esperado | o banco é privado; acesse de dentro da VPC |
 | WAF não cria | provider us-east-1 ausente | confirme o bloco `aws.us_east_1` em `providers.tf` |
-```
