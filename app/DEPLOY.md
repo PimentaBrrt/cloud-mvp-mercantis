@@ -7,16 +7,13 @@ imagens dos produtos para o S3 (servidas depois pelo CloudFront em `/static/...`
 A estratégia escolhida foi **buildar a imagem na própria EC2**. O código chega na
 instância por meio do bucket S3 (a EC2 já tem permissão de leitura via IAM role).
 
-## 0. Pré-requisito: reaplicar o Terraform
+> **Atenção aos placeholders.** Tudo que aparece entre `<` e `>` (por exemplo
+> `<STATIC_BUCKET>`, `<DB_SECRET_ARN>`, `<INSTANCE_ID>`) é para **substituir** pelo
+> valor real. Não cole o texto com os sinais `<>`, senão dá erro de validação.
 
-As últimas mudanças adicionam a permissão de `s3:PutObject` (upload de imagens) e
-ajustam o IMDS (`http_put_response_hop_limit = 2`) para o container acessar a role.
-São alterações in-place: a instância e o IP não mudam.
+## 0. Pré-requisito: Aplicar o Terraform
 
-```bash
-cd terraform
-terraform apply
-```
+Siga as instrução do `README.md` para aplicar o Terraform.
 
 Anote os valores que vamos usar:
 
@@ -26,14 +23,17 @@ terraform output -raw db_secret_arn         # ARN do segredo do banco
 terraform output ssm_access_hint            # contém o --target <instance-id>
 ```
 
-## 1. Enviar o código para o S3 (na sua máquina)
+## 1. Enviar o código para o S3
 
 Compacte a pasta `app` (sem `node_modules`) e suba para o bucket. No **PowerShell** (Windows):
 
 ```powershell
-cd mercantis-mvp
+# Na raiz do projeto. Pega o nome real do bucket do Terraform:
+$bucket = terraform -chdir=terraform output -raw static_bucket_name
+echo $bucket   # confira que apareceu algo como mercantis-mvp-static-ab12cd34
+
 Compress-Archive -Path app\* -DestinationPath app.zip -Force
-aws s3 cp app.zip s3://<STATIC_BUCKET>/deploy/app.zip --region sa-east-1
+aws s3 cp app.zip "s3://$bucket/deploy/app.zip" --region sa-east-1
 ```
 
 No **Linux/macOS**:
@@ -137,7 +137,7 @@ inicialização. Há três lugares para olhar:
    ```bash
    aws logs tail /mercantis-mvp/app --follow --region sa-east-1
    ```
-3. **Logs de infraestrutura:**
+3. **Logs de infraestrutura (já existiam):**
    - **VPC Flow Logs** (tráfego de rede): grupo `/vpc/mercantis-mvp/flow-logs`.
    - **RDS** (erro, geral e slow query): grupos `/aws/rds/instance/mercantis-mvp-mariadb/...`.
 

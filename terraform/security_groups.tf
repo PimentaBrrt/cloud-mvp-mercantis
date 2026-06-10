@@ -49,9 +49,19 @@ resource "aws_security_group_rule" "frontend_egress" {
   description       = "Saida liberada para download de imagem/patches."
 }
 
-# OBS.: Não há regra de SSH (porta 22). O acesso administrativo é feito via
-# AWS Systems Manager Session Manager (ver iam.tf), eliminando a exposição
-# da porta 22 — medida de segurança adicional em relação ao diagrama base.
+# Acesso administrativo: o desenho original usa o SSM Session Manager (ver iam.tf).
+# Como o SSM não registrou neste ambiente, liberamos a porta 22 temporariamente
+# para acessar a instância via EC2 Instance Connect / SSH e fazer o deploy.
+# Em produção, restrinja o CIDR ao seu IP ou remova esta regra (volte ao SSM).
+resource "aws_security_group_rule" "frontend_ssh" {
+  type              = "ingress"
+  security_group_id = aws_security_group.frontend.id
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "SSH temporario para deploy (EC2 Instance Connect)."
+}
 
 # ---------------------------------------------------------------------------
 # SG do banco de dados (RDS MariaDB) na subnet privada.
